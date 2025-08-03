@@ -1,0 +1,90 @@
+<script>
+  const choices = ["剪刀", "石頭", "布"];
+  const emojis = { "剪刀": "✌️", "石頭": "✊", "布": "🖐️" };
+
+  let totalRounds = 0;
+  let currentRound = 0;
+  let win = 0;
+  let lose = 0;
+  let draw = 0;
+  let currentStreak = 0;
+  let maxStreak = 0;
+  let loseStreak = 0;
+  let maxLoseStreak = 0;
+
+  function startGame() {
+    const input = document.getElementById("roundsInput").value;
+    totalRounds = parseInt(input);
+    if (isNaN(totalRounds) || totalRounds <= 0) {
+      alert("請輸入正確的局數！");
+      return;
+    }
+
+    // 初始化所有統計
+    currentRound = win = lose = draw = currentStreak = maxStreak = loseStreak = maxLoseStreak = 0;
+
+    document.getElementById("setup").classList.add("hidden");
+    document.getElementById("game").classList.remove("hidden");
+    document.getElementById("finalResult").classList.add("hidden");
+    document.getElementById("roundResult").innerText = "";
+    updateRoundCount();
+  }
+
+  function playRound(playerChoice) {
+    if (currentRound >= totalRounds) return;
+
+    const computerChoice = choices[Math.floor(Math.random() * 3)];
+    let resultText = `你出：${playerChoice} ${emojis[playerChoice]}<br>電腦出：${computerChoice} ${emojis[computerChoice]}<br>`;
+
+    if (playerChoice === computerChoice) {
+      resultText += "結果：平手！";
+      draw++;
+      // 平手不影響連勝紀錄
+    } else if (
+      (playerChoice === "剪刀" && computerChoice === "布") ||
+      (playerChoice === "石頭" && computerChoice === "剪刀") ||
+      (playerChoice === "布" && computerChoice === "石頭")
+    ) {
+      resultText += "結果：你贏了！🎉";
+      win++;
+      currentStreak++;
+      maxStreak = Math.max(maxStreak, currentStreak);
+      loseStreak = 0;  // 斷開連敗
+    } else {
+      resultText += "結果：你輸了！💥";
+      lose++;
+      loseStreak++;
+      maxLoseStreak = Math.max(maxLoseStreak, loseStreak);
+      currentStreak = 0;  // 斷開連勝
+    }
+
+    currentRound++;
+    document.getElementById("roundResult").innerHTML = resultText;
+    updateRoundCount();
+
+    if (currentRound >= totalRounds) {
+      endGame();
+    }
+  }
+
+  function updateRoundCount() {
+    document.getElementById("roundCount").innerText = `第 ${currentRound} / ${totalRounds} 局`;
+  }
+
+  function endGame() {
+    document.getElementById("game").classList.add("hidden");
+    const resultHTML = `
+      🎯 遊戲結束！<br><br>
+      ✅ 勝利局數：${win}<br>
+      ❌ 落敗局數：${lose}<br>
+      😐 平手局數：${draw}<br><br>
+      🔥 當前連勝：${currentStreak}<br>
+      🏆 最高連勝紀錄：${maxStreak}<br>
+      💀 最高連敗紀錄：${maxLoseStreak}
+    `;
+    const final = document.getElementById("finalResult");
+    final.innerHTML = resultHTML;
+    final.classList.remove("hidden");
+    document.getElementById("setup").classList.remove("hidden");
+  }
+</script>
